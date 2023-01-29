@@ -2,9 +2,12 @@ import os
 import pandas as pd
 import requests
 
-from frontend_app.app_utils.logging_utils import get_logger
+from frontend_app.utils.logging_utils import get_logger
 
 logger = get_logger("DataUtils")
+
+# set constant
+VALUE_COLUMN = "value"
 
 
 def get_all_data(api_url: str = "", api_endpoint: str = "") -> pd.DataFrame:
@@ -42,10 +45,12 @@ def get_all_data(api_url: str = "", api_endpoint: str = "") -> pd.DataFrame:
 
     logger.info(f"Retrieved {num_rows_api_data} from {api_request_str}")
 
+    # read values as numeric
+    data_df[VALUE_COLUMN] = pd.to_numeric(data_df[VALUE_COLUMN].replace(',', '', regex=True))
+
     return data_df
 
 
 if __name__ == "__main__":
-
     df = get_all_data(api_url=DATA_API_URL, api_endpoint=API_ENDPOINT)
     print(df.shape[0])

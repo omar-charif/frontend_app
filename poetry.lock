@@ -126,7 +126,7 @@ testing = ["beautifulsoup4 (>=4.8.2)", "lxml (>=4.6.2)", "percy (>=2.0.2)", "pyt
 
 [[package]]
 name = "dash-bootstrap-components"
-version = "1.3.0"
+version = "1.3.1"
 description = "Bootstrap themed components for use in Plotly Dash"
 category = "main"
 optional = false
@@ -682,7 +682,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "flake8 (<5)", "pytest-co
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "dd9e31aa9642bf39527770d43e46774b4f50a23f56467862f1ed2fe98e1e6ef0"
+content-hash = "9050b8b8dd64d5f79f2e61a09b45bf21965de90492209cda58bbdc03062d4499"
 
 [metadata.files]
 astroid = []

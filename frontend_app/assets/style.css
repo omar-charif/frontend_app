@@ -6,7 +6,7 @@ body {
 
 .header {
     background-color: #4d88FF;
-    height: 288px;
+    height: 100px;
     padding: 16px 0 0 0;
 }
 
@@ -29,6 +29,14 @@ body {
     margin: 4px auto;
     text-align: center;
     max-width: 384px;
+}
+
+.table {
+    margin-right: 10px;
+    margin-left: 10px;
+    padding-right: 10px;
+    padding-left: 10px;
+    margin-top: 10px;
 }
 
 .wrapper {

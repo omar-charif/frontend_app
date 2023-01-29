@@ -1,9 +1,16 @@
-from dash import Dash, dash_table, dcc, html
-from dash.dependencies import Input, Output
-import pandas as pd
+# If you prefer to run the code online instead of on your computer click:
+# https://github.com/Coding-with-Adam/Dash-by-Plotly#execute-code-in-browser
 import os
 
-from frontend_app.app_utils.data_utils import get_all_data
+from dash import Dash, dash_table, dcc, Output, Input  # pip install dash
+import dash_bootstrap_components as dbc  # pip install dash-bootstrap-components
+import plotly.express as px
+import pandas as pd  # pip install pandas
+from frontend_app.utils.data_utils import get_all_data
+
+from frontend_app.utils.logging_utils import get_logger
+
+logger = get_logger("Beyond2020App")
 
 # set constant data
 DATA_API_URL = os.environ["DATA_API_HOST"]
@@ -20,116 +27,88 @@ external_stylesheets = [
     },
 ]
 
+# get all data
+df = get_all_data(api_url=DATA_API_URL, api_endpoint=API_ENDPOINT)
 
-image_path = 'assets/oil_rig_small.png'
+# Build your components
+app = Dash(__name__, external_stylesheets=external_stylesheets)
+title = dcc.Markdown('Beyond 2020 Analytics', className="header-title")
+description = dcc.Markdown(children="Display and explore worldwide oil and gas products balance data "
+                                   " specifically  the amount  of exported barrel per day"
+                                   " for the period from September, 2021 to November, 2022",
+                           className="header-description", )
+data_table = dash_table.DataTable(
+    id='datatable-interactivity',
+    columns=[
+        {"name": i, "id": i, "deletable": True, "selectable": True} for i in df.columns
+    ],
+    data=df.to_dict('records'),
+    editable=True,
+    filter_action="native",
+    sort_action="native",
+    sort_mode="multi",
+    column_selectable="single",
+    row_selectable="multi",
+    row_deletable=True,
+    selected_columns=[],
+    selected_rows=[],
+    page_action="native",
+    page_current=0,
+    page_size=10,
+)
+graph = dcc.Graph(figure={})
 
-
-def build_dashboard():
-    # build interactive web page
-
-    # retrieve all data
-    df = get_all_data(api_url=DATA_API_URL, api_endpoint=API_ENDPOINT)
-    app = Dash(__name__, external_stylesheets=external_stylesheets)
-
-    app.layout = html.Div([
-        html.Div(
-            children=[
-                html.Div(html.Img(src=image_path), className="header-img"),
-                html.H1(
-                    children="Beyond 2020 Analytics", className="header-title"
-                ),
-                html.P(
-                    children="Display and explore worldwide oil and gas products balance data "
-                             " specifically  the amount  of exported barrel per day"
-                             " for the period from September, 2021 to November, 2022",
-                    className="header-description",
-                ),
-            ],
-            className="header",
-        ),
-        dash_table.DataTable(
-            id='datatable-interactivity',
-            columns=[
-                {"name": i, "id": i, "deletable": True, "selectable": True} for i in df.columns
-            ],
-            data=df.to_dict('records'),
-            editable=True,
-            filter_action="native",
-            sort_action="native",
-            sort_mode="multi",
-            column_selectable="single",
-            row_selectable="multi",
-            row_deletable=True,
-            selected_columns=[],
-            selected_rows=[],
-            page_action="native",
-            page_current=0,
-            page_size=10,
-        ),
-        html.Div(id='datatable-interactivity-container')
+# Customize your own Layout
+app.layout = dbc.Container([
+    dbc.Row([
+        dbc.Col([title])
+    ], className="header"),
+    dbc.Row([
+        dbc.Col([description])
+    ], className="header"),
+    dbc.Row([
+        dbc.Col([data_table], className="table")
+    ]),
+    dbc.Row([
+        dbc.Col([graph], width=12)
     ])
 
-    @app.callback(
-        Output('datatable-interactivity', 'style_data_conditional'),
-        Input('datatable-interactivity', 'selected_columns')
+], fluid=True)
+
+# detect if table change and update based on selection and filters in the table
+@app.callback(
+    Output('datatable-interactivity', 'style_data_conditional'),
+    Input('datatable-interactivity', 'selected_columns')
+)
+def update_styles(selected_columns):
+    return [{
+        'if': {'column_id': i},
+        'background_color': '#D2F3FF'
+    } for i in selected_columns]
+
+
+# Callback allows components to interact
+@app.callback(
+    Output(graph, 'figure'),
+    Input('datatable-interactivity', "derived_virtual_data")
+)
+def update_graph(rows):  # function arguments come from the component property of the Input
+
+    dff = df if rows is None else pd.DataFrame(rows)
+    min_value = dff[VALUE_COLUMN].min()
+    max_value = dff[VALUE_COLUMN].max()
+    logger.info(f"{min_value}, {type(min_value)}")
+    logger.info(f"{max_value}, {type(max_value)}")
+
+    fig = px.bar(
+        dff, x=KEY_COLUMN, y=VALUE_COLUMN, color=VALUE_COLUMN,
+        animation_frame=MONTH_YEAR_COLUMN, animation_group=KEY_COLUMN,
+        range_y=[min_value, max_value]
     )
-    def update_styles(selected_columns):
-        return [{
-            'if': {'column_id': i},
-            'background_color': '#D2F3FF'
-        } for i in selected_columns]
 
-    @app.callback(
-        Output('datatable-interactivity-container', "children"),
-        Input('datatable-interactivity', "derived_virtual_data"),
-        Input('datatable-interactivity', "derived_virtual_selected_rows"))
-    def update_graphs(rows, derived_virtual_selected_rows):
-        # When the table is first rendered, `derived_virtual_data` and
-        # `derived_virtual_selected_rows` will be `None`. This is due to an
-        # idiosyncrasy in Dash (unsupplied properties are always None and Dash
-        # calls the dependent callbacks when the component is first rendered).
-        # So, if `rows` is `None`, then the component was just rendered
-        # and its value will be the same as the component's dataframe.
-        # Instead of setting `None` in here, you could also set
-        # `derived_virtual_data=df.to_rows('dict')` when you initialize
-        # the component.
-        if derived_virtual_selected_rows is None:
-            derived_virtual_selected_rows = []
-
-        dff = df if rows is None else pd.DataFrame(rows)
-
-        colors = ['#7FDBFF' if i in derived_virtual_selected_rows else '#0074D9'
-                  for i in range(len(dff))]
-
-        return [
-            # dcc.Graph(figure=)
-            dcc.Graph(
-                id=VALUE_COLUMN,
-                figure={
-                    "data": [
-                        {
-                            "x": dff[KEY_COLUMN],
-                            "y": dff[VALUE_COLUMN],
-                            "type": "bar",
-                            "marker": {"color": colors},
-                        }
-                    ],
-                    "layout": {
-                        "xaxis": {"automargin": True},
-                        "yaxis": {
-                            "automargin": True,
-                            "title": {"text": VALUE_COLUMN}
-                        },
-                        "height": 600,
-                        "margin": {"t": 50, "l": 50, "r": 50},
-                    },
-                },
-            )
-        ]
-
-    return app
+    return fig # returned objects are assigned to the component property of the Output
 
 
+# Run app
 if __name__ == '__main__':
-    app = build_dashboard()
-    app.run_server(debug=True)
+    app.run_server(port=8054)
