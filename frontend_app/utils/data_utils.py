@@ -35,7 +35,7 @@ def get_all_data(api_url: str = "", api_endpoint: str = "") -> pd.DataFrame:
 
     response_json = response.json()
 
-    num_rows_api_data = response_json['number_of_retrieved_rows']
+    num_rows_api_data = response_json["number_of_retrieved_rows"]
 
     data_df = pd.DataFrame(data=response_json["data"])
 
@@ -46,7 +46,9 @@ def get_all_data(api_url: str = "", api_endpoint: str = "") -> pd.DataFrame:
     logger.info(f"Retrieved {num_rows_api_data} from {api_request_str}")
 
     # read values as numeric
-    data_df[VALUE_COLUMN] = pd.to_numeric(data_df[VALUE_COLUMN].replace(',', '', regex=True))
+    data_df[VALUE_COLUMN] = pd.to_numeric(
+        data_df[VALUE_COLUMN].replace(",", "", regex=True)
+    )
 
     return data_df
 
