@@ -1,8 +1,7 @@
-import os
 import pandas as pd
 import requests
 
-from frontend_app.utils.logging_utils import get_logger
+from logging_utils import get_logger
 
 logger = get_logger("DataUtils")
 
