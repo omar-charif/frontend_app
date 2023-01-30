@@ -23,23 +23,25 @@ MONTH_YEAR_COLUMN = "month_year"
 external_stylesheets = [
     {
         "href": "https://fonts.googleapis.com/css2?"
-        "family=Lato:wght@400;700&display=swap",
+                "family=Lato:wght@400;700&display=swap",
         "rel": "stylesheet",
     },
 ]
 
-# get all data
-df = get_all_data(api_url=DATA_API_URL, api_endpoint=API_ENDPOINT)
 
+def build_webpage():
+    # build the app webpage
 
-def build_bashboard():
+    # get all data
+    df = get_all_data(api_url=DATA_API_URL, api_endpoint=API_ENDPOINT)
+
     # Build your components
     app = Dash(__name__, external_stylesheets=external_stylesheets)
     title = dcc.Markdown("Beyond 2020 Analytics", className="header-title")
     description = dcc.Markdown(
         children="Display and explore worldwide oil and gas products balance data "
-        " specifically  the amount  of exported barrel per day"
-        " for the period from September, 2021 to November, 2022",
+                 " specifically  the amount  of exported barrel per day"
+                 " for the period from September, 2021 to November, 2022",
         className="header-description",
     )
     data_table = dash_table.DataTable(
@@ -92,14 +94,12 @@ def build_bashboard():
         Input("datatable-interactivity", "derived_virtual_data"),
     )
     def update_graph(
-        rows,
+            rows,
     ):  # function arguments come from the component property of the Input
 
         dff = df if rows is None else pd.DataFrame(rows)
         min_value = dff[VALUE_COLUMN].min()
         max_value = dff[VALUE_COLUMN].max()
-        logger.info(f"{min_value}, {type(min_value)}")
-        logger.info(f"{max_value}, {type(max_value)}")
 
         fig = px.bar(
             dff,
@@ -117,8 +117,8 @@ def build_bashboard():
 
 
 def main():
-    # function that will run the app
-    app = build_bashboard()
+    # runs the build dashboard and deploy the app
+    app = build_webpage()
     app.run_server(debug=True)
 
 

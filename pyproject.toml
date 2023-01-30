@@ -4,6 +4,9 @@ version = "0.1.0"
 description = "front app for the data scrapper"
 authors = ["omar charif <charif.omar83@gmail.com>"]
 
+[tools.poetry.scripts]
+run-app="frontend_app.app:main"
+
 [tool.poetry.dependencies]
 python = "^3.8"
 dash = "^2.8.0"

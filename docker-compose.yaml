@@ -1,0 +1,10 @@
+version: "3"
+services:
+  frontend:
+    image: frontend_app
+    build:
+      context: ./
+    ports:
+      - "8050:8050"
+    environment:
+      - DATA_API_HOST=http://127.0.0.1:5050
