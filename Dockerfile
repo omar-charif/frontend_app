@@ -1,17 +1,20 @@
-FROM python:3.8-slim-buster
+FROM python:3.8.6-slim-buster
 
-RUN apt-get update &&\
-    apt install --assume-yes gunicorn
+# set working directory in container
+WORKDIR /usr/src/app
 
-COPY pyproject.toml poetry.lock ./
+# Copy and install packages
+COPY requirements.txt /
+RUN pip install --upgrade pip
+RUN pip install -r /requirements.txt
+RUN pip install gunicorn
 
-RUN pip install poetry &&\
-    poetry config virtualenvs.in-project true &&\
-    poetry install
+# Copy app folder to app folder in container
+COPY /app /usr/src/app/
 
- EXPOSE 8050
+# Changing to non-root user
+RUN useradd -m appUser
+USER appUser
 
-COPY . ./
-
-CMD python /frontend_app/app.py
-
+# Run locally on port 8050
+CMD gunicorn --bind 0.0.0.0:8050 app:server
