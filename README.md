@@ -1,7 +1,7 @@
 # frontend_app
 This tool is the webpage for displaying and analyzing scraped data.This Web app show the scrapped\
-data in a table that could be filtered and ordered. It also displays the filtered and ordered data\
-on animated bar plot. The animation is done and time. 
+data in a table that could be filtered and ordered. It also displays the filtered and ordered data using\
+animated bar plot. The animation is done and time. 
 
 # Usage
 To run locally follow the below steps:
