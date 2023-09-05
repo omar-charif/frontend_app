@@ -12,7 +12,8 @@ To run locally follow the below steps:
 
 This tool requires an environmental variable to work. The environmental variable is:
 DATA_API_HOST=http://{address_Of_data_Scrapper_app}:5050 \
-example when deploying locally: DATA_API_HOST=http://127.0.0.1:5050
+example when deploying locally both backend and frontend: DATA_API_HOST=http://172.17.0.1:5050 \
+Note that, 172.17.0.1 is the ip address of the bridge network used by backend container.
 
 # usage using docker
 This app using the ci/cd pipline is deployed automatically to docker hub everytime a pull request\
